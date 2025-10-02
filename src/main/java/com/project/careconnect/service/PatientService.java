@@ -3,9 +3,8 @@ package com.project.careconnect.service;
 import com.project.careconnect.model.Patient;
 import com.project.careconnect.repository.PatientRepo;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
-import org.springframework.web.bind.annotation.RequestBody;
+
 
 import java.util.List;
 
