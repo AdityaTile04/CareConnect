@@ -1,12 +1,15 @@
 package com.project.careconnect.service;
 
+import com.project.careconnect.dto.PatientRequestDTO;
+import com.project.careconnect.dto.PatientResponseDTO;
 import com.project.careconnect.model.Patient;
 import com.project.careconnect.repository.PatientRepo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-
 import java.util.List;
+import java.util.stream.Collectors;
+
 
 @Service
 public class PatientService {
@@ -14,31 +17,55 @@ public class PatientService {
     @Autowired
     private PatientRepo patientRepo;
 
-    public List<Patient> getAllPatients() {
-        return patientRepo.findAll();
+    private PatientResponseDTO mapToDTO(Patient patient) {
+        return new PatientResponseDTO(
+                patient.getId(),
+                patient.getName(),
+                patient.getAge(),
+                patient.getPhone()
+        );
     }
 
-    public Patient addPatient(Patient patient) {
-        return patientRepo.save( patient );
+    private Patient mapToEntity(PatientRequestDTO dto) {
+        Patient patient = new Patient();
+        patient.setName( dto.getName() );
+        patient.setAge( dto.getAge() );
+        patient.setPhone( dto.getPhone() );
+        return patient;
     }
 
-    public Patient getPatientById(int id) {
+    public List<PatientResponseDTO> getAllPatients() {
+        return patientRepo.findAll()
+                .stream()
+                .map( this::mapToDTO )
+                .collect( Collectors.toList() );
+    }
+
+    public PatientResponseDTO getPatientById(int id) {
+        Patient patient = patientRepo.findById( id )
+                .orElseThrow(() -> new RuntimeException("Patient not found"));
+        return mapToDTO( patient );
+    }
+    public PatientResponseDTO addPatient(PatientRequestDTO patientRequestDTO) {
+        Patient patient = mapToEntity( patientRequestDTO );
+        Patient savedPatient = patientRepo.save( patient );
+        return mapToDTO( savedPatient );
+    }
+
+    public PatientResponseDTO updatePatient(PatientRequestDTO patientRequestDTO, int id) {
         return patientRepo.findById( id )
-                .orElseThrow(() -> new RuntimeException("User not found with id : " + id));
-    }
-
-    public Patient updatePatient(Patient patient, int id) {
-        return patientRepo.findById( id )
-                .map( p -> {
-                    p.setName( patient.getName() );
-                    p.setAge( patient.getAge() );
-                    p.setGender( patient.getGender() );
-                    p.setPhone( patient.getPhone() );
-                    return patientRepo.save( p );
-                } ).orElseThrow(() -> new RuntimeException("Error while updating system"));
+                .map(patient -> {
+                    patient.setName( patientRequestDTO.getName() );
+                    patient.setAge( patientRequestDTO.getAge() );
+                    patient.setPhone(patientRequestDTO.getPhone());
+                    Patient updatedPatient = patientRepo.save( patient );
+                    return mapToDTO( updatedPatient );
+                })
+                .orElseThrow(() -> new RuntimeException("Error while updating Patient"));
     }
 
     public void deletePatient(int id) {
          patientRepo.deleteById( id );
     }
+
 }
