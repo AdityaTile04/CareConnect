@@ -15,6 +15,7 @@ public class WebSecurityConfig {
         httpSecurity
                 .authorizeHttpRequests(auth -> {
                     auth.requestMatchers( "/api/v1/doctors" ).permitAll()
+                            .requestMatchers( "/api/v1/appointment" ).permitAll()
                             .requestMatchers( "/api/v1/patients" ).authenticated();
                 }).formLogin( Customizer.withDefaults());
 
