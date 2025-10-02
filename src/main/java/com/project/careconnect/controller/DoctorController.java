@@ -1,6 +1,7 @@
 package com.project.careconnect.controller;
 
-import com.project.careconnect.model.Doctor;
+import com.project.careconnect.dto.DoctorRequestDTO;
+import com.project.careconnect.dto.DoctorResponseDTO;
 import com.project.careconnect.service.DoctorService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -16,22 +17,22 @@ public class DoctorController {
     private DoctorService doctorService;
 
     @GetMapping("/doctors")
-    public ResponseEntity<List<Doctor>> getAllDoctors() {
+    public ResponseEntity<List<DoctorResponseDTO>> getAllDoctors() {
         return ResponseEntity.ok(doctorService.getAllDoctors());
     }
 
     @GetMapping("/doctors/{id}")
-    public ResponseEntity<Doctor> getDoctorById(@PathVariable int id) {
+    public ResponseEntity<DoctorResponseDTO> getDoctorById(@PathVariable int id) {
         return ResponseEntity.ok(doctorService.getDoctorById(id));
     }
 
     @PostMapping("/doctor")
-    public ResponseEntity<Doctor> addDoctor(@RequestBody Doctor doctor) {
+    public ResponseEntity<DoctorResponseDTO> addDoctor(@RequestBody DoctorRequestDTO doctor) {
         return ResponseEntity.ok(doctorService.addDoctor(doctor));
     }
 
     @PutMapping("/doctors/{id}")
-    public ResponseEntity<Doctor> updateDoctor(@RequestBody Doctor doctor, @PathVariable int id) {
+    public ResponseEntity<DoctorResponseDTO> updateDoctor(@RequestBody DoctorRequestDTO doctor, @PathVariable int id) {
         return ResponseEntity.ok(doctorService.updateDoctor(doctor, id));
     }
 

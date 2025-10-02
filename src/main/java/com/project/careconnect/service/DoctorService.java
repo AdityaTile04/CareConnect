@@ -1,11 +1,16 @@
 package com.project.careconnect.service;
 
+
+import com.project.careconnect.dto.DoctorRequestDTO;
+import com.project.careconnect.dto.DoctorResponseDTO;
 import com.project.careconnect.model.Doctor;
 import com.project.careconnect.repository.DoctorRepo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.stream.Collectors;
+
 
 @Service
 public class DoctorService {
@@ -13,31 +18,55 @@ public class DoctorService {
     @Autowired
     private DoctorRepo doctorRepo;
 
-    public List<Doctor> getAllDoctors() {
-        return doctorRepo.findAll();
+    private DoctorResponseDTO mapToDTO(Doctor doctor) {
+        return new DoctorResponseDTO(
+                doctor.getId(),
+                doctor.getName(),
+                doctor.getSpecialization(),
+                doctor.getPhone()
+        );
     }
 
-    public Doctor addDoctor(Doctor doctor) {
-        return doctorRepo.save( doctor );
+    private Doctor mapToEntity(DoctorRequestDTO dto) {
+        Doctor doctor = new Doctor();
+        doctor.setName( dto.getName() );
+        doctor.setSpecialization( dto.getSpecialization() );
+        doctor.setPhone( dto.getPhone() );
+        return doctor;
+    }
+    public List<DoctorResponseDTO> getAllDoctors() {
+        return doctorRepo.findAll()
+                .stream()
+                .map(this::mapToDTO)
+                .collect(Collectors.toList());
     }
 
-    public Doctor getDoctorById(int id) {
-        return doctorRepo.findById( id ).orElseThrow(() -> new RuntimeException("User not found"));
+    public DoctorResponseDTO addDoctor(DoctorRequestDTO doctorRequestDTO) {
+        Doctor doctor = mapToEntity( doctorRequestDTO );
+        Doctor savedDoctor = doctorRepo.save( doctor );
+        return mapToDTO( savedDoctor );
     }
 
-    public Doctor updateDoctor(Doctor doctor, int id) {
+    public DoctorResponseDTO getDoctorById(int id) {
+        Doctor doctor = doctorRepo.findById( id )
+                .orElseThrow(() -> new RuntimeException("Doctor not found"));
+        return mapToDTO( doctor );
+    }
+
+    public DoctorResponseDTO updateDoctor(DoctorRequestDTO doctorRequestDTO, int id) {
         return doctorRepo.findById( id )
-                .map( doc -> {
-                    doc.setName( doctor.getName() );
-                    doc.setSpecialization(doctor.getSpecialization());
-                    doc.setPhone( doctor.getPhone() );
-                    return doctorRepo.save( doc );
-                }
-                ).orElseThrow(() -> new RuntimeException("Error while updating user"));
+                .map(doc -> {
+                    doc.setName( doctorRequestDTO.getName() );
+                    doc.setSpecialization( doctorRequestDTO.getSpecialization() );
+                    doc.setPhone( doctorRequestDTO.getPhone() );
+                    Doctor updatedDoctor = doctorRepo.save( doc );
+                    return mapToDTO( updatedDoctor );
+                })
+                .orElseThrow(() -> new RuntimeException("Error while updating doctor"));
     }
 
     public void deleteDoctor(int id) {
-         doctorRepo.deleteById( id );
+        doctorRepo.deleteById(id);
     }
 }
 
